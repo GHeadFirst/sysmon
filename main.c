@@ -10,28 +10,118 @@ int main()
     if (fptr == NULL)
     {
         fprintf(stderr, "Error, File /proc/meminfo could not be opened");
+        return -1;
     }
 
     char buff[BUFFER_SIZE];
+
+    unsigned long total_memory, free_memory, available_memory;
+    char temp[100];
 
     while (fgets(buff, BUFFER_SIZE, fptr))
     {
         if (strncmp("MemTotal", buff, 8) == 0)
         {
             printf("%s", buff);
+            sscanf(buff, "%s %lu", temp, &total_memory);
+            printf("%s %lu\n", temp, total_memory);
         }
         else if (strncmp("MemFree", buff, 7) == 0)
         {
-            printf("%s", buff);
+            sscanf(buff, "%s %lu", temp, &free_memory);
+            printf("%s %lu\n", temp, free_memory);
         }
         else if (strncmp("MemAvailable", buff, 12) == 0)
         {
-            printf("%s", buff);
+            sscanf(buff, "%s %lu", temp, &available_memory);
+            printf("%s %lu\n", temp, available_memory);
         }
         else
-            printf("Misc Information\n");
+        {
+            // printf("Misc Information\n");
+        }
     }
 
+    total_memory = total_memory / 1024;
+
+    free_memory = free_memory / 1024;
+
+    available_memory = available_memory / 1024;
+
+    printf("=== Memory Info ===\n");
+
+    printf("%-20s %10lu MB\n", "Total Memory:", total_memory);
+
+    printf("%-20s %10lu MB\n", "Free Memory:", free_memory);
+
+    printf("%-20s %10lu MB\n", "Available Memory:", available_memory);
+
+    // printf("Temp variable %s\n", temp);
+
+    total_memory = total_memory / 1024;
+
+    // printf("Test output, my memory is: %luGB\n", total_memory);
+
     fclose(fptr);
+
+    fptr = fopen("/proc/cpuinfo", "r");
+    if (!fptr)
+    {
+        fprintf(stderr, "Error opening file /proc/cpuinfo");
+        return -1;
+    }
+
+    char cpu_model_name[256];
+    int core_count;
+
+    while (fgets(buff, BUFFER_SIZE, fptr))
+    {
+        printf(buff);
+        if (strncmp("model name", buff, 10) == 0)
+        {
+            char *starting_point = strchr(buff, ':'); // basically here it searches inside my buffer until it finds where ":" starts and returns a pointer to that position ->model name : blah blah blah, it returns the position of ":" in that line/buffer
+            printf("Pointer location: %p and the character is %s\n", starting_point, starting_point);
+            if (starting_point) // this is supposed to be the pointer at where : is located in my buffer
+            {
+                starting_point++;
+                strncpy(cpu_model_name, starting_point, 256);
+                // sscanf(starting_point, "%s", cpu_model_name);
+                printf("My Starting point is: %s", starting_point);
+                printf("First Statement got trigged with %s\n", buff);
+                // sscanf(buff, "%s %s %s %s", temp, temp, temp, cpu_model_name);
+                printf("==== My cpu_model_name is: %s ====\n", cpu_model_name);
+                // printf("Temp Variable is %s", temp);
+            }
+            printf("===== I GOT TRIGGERED======");
+        }
+        else if (strncmp("cpu cores", buff, 9) == 0)
+        {
+            char *starting_point = strchr(buff, ':');
+            if (starting_point)
+            {
+                starting_point++;
+                while (*starting_point == ' ')
+                {
+                    starting_point++;
+                }
+                printf("My Starting point is %p address and String %s", starting_point, starting_point);
+
+                sscanf(starting_point, "%d", &core_count);
+
+                // sscanf(buff, "%s %s %s %d", temp, temp, temp, &core_count);
+                printf("==== My core_count is: %d ====\n", core_count);
+                printf("Temp Variable is %s", temp);
+
+                break;
+            }
+        }
+        else
+            printf("Misc Info %s", buff);
+    }
+
+    printf("=== CPU Info ===\n");
+    printf("CPU Model Name:%-15s", cpu_model_name);
+
+    printf("CPU Core Count:%-15d\n", core_count);
     return 0;
 }
