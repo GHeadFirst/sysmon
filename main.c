@@ -22,19 +22,15 @@ int main()
     {
         if (strncmp("MemTotal", buff, 8) == 0)
         {
-            printf("%s", buff);
             sscanf(buff, "%s %lu", temp, &total_memory);
-            printf("%s %lu\n", temp, total_memory);
         }
         else if (strncmp("MemFree", buff, 7) == 0)
         {
             sscanf(buff, "%s %lu", temp, &free_memory);
-            printf("%s %lu\n", temp, free_memory);
         }
         else if (strncmp("MemAvailable", buff, 12) == 0)
         {
             sscanf(buff, "%s %lu", temp, &available_memory);
-            printf("%s %lu\n", temp, available_memory);
         }
         else
         {
@@ -76,23 +72,14 @@ int main()
 
     while (fgets(buff, BUFFER_SIZE, fptr))
     {
-        printf(buff);
         if (strncmp("model name", buff, 10) == 0)
         {
             char *starting_point = strchr(buff, ':'); // basically here it searches inside my buffer until it finds where ":" starts and returns a pointer to that position ->model name : blah blah blah, it returns the position of ":" in that line/buffer
-            printf("Pointer location: %p and the character is %s\n", starting_point, starting_point);
-            if (starting_point) // this is supposed to be the pointer at where : is located in my buffer
+            if (starting_point)                       // this is supposed to be the pointer at where : is located in my buffer
             {
                 starting_point++;
                 strncpy(cpu_model_name, starting_point, 256);
-                // sscanf(starting_point, "%s", cpu_model_name);
-                printf("My Starting point is: %s", starting_point);
-                printf("First Statement got trigged with %s\n", buff);
-                // sscanf(buff, "%s %s %s %s", temp, temp, temp, cpu_model_name);
-                printf("==== My cpu_model_name is: %s ====\n", cpu_model_name);
-                // printf("Temp Variable is %s", temp);
             }
-            printf("===== I GOT TRIGGERED======");
         }
         else if (strncmp("cpu cores", buff, 9) == 0)
         {
@@ -104,19 +91,14 @@ int main()
                 {
                     starting_point++;
                 }
-                printf("My Starting point is %p address and String %s", starting_point, starting_point);
 
                 sscanf(starting_point, "%d", &core_count);
-
-                // sscanf(buff, "%s %s %s %d", temp, temp, temp, &core_count);
-                printf("==== My core_count is: %d ====\n", core_count);
-                printf("Temp Variable is %s", temp);
-
                 break;
             }
         }
         else
-            printf("Misc Info %s", buff);
+        {
+        }
     }
 
     printf("=== CPU Info ===\n");
