@@ -30,7 +30,7 @@ int main()
   }
   // printf("Temp variable %s\n", temp);
 
-  // printf("Test output, my memory is: %luGB\n", total_memory);
+  // printf("Test output, memory is: %luGB\n", total_memory);
 
   char cpu_model_name[256];
   int core_count;
@@ -225,12 +225,16 @@ int read_net_dev()
     return -1;
   }
 
-  char interface_name[64];
-  unsigned long received_bytes, received_packets, received_errors, received_drops, received_fifo, received_frame, received_compressed, received_multicast;
-  unsigned long transmitted_bytes, transmitted_packets, transmitted_errors, transmitted_drops, transmitted_fifo, transmitted_colls, transmitted_carrier, transmitted_compressed;
   while (fgets(buff, BUFFER_SIZE, fptr))
   {
+    char interface_name[64];
+
+    unsigned long received_bytes, received_packets, received_errors, received_drops, received_fifo, received_frame, received_compressed, received_multicast;
+
+    unsigned long transmitted_bytes, transmitted_packets, transmitted_errors, transmitted_drops, transmitted_fifo, transmitted_colls, transmitted_carrier, transmitted_compressed;
+
     char *target = strchr(buff, ':');
+
     if (!target)
     {
       continue;
@@ -240,40 +244,10 @@ int read_net_dev()
     interface_name[target - buff] = '\0';
     target++;
     sscanf(target, "%lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu", &received_bytes, &received_packets, &received_errors, &received_drops, &received_fifo, &received_frame, &received_compressed, &received_multicast, &transmitted_bytes, &transmitted_packets, &transmitted_errors, &transmitted_drops, &transmitted_fifo, &transmitted_colls, &transmitted_carrier, &transmitted_compressed);
-    printf("My Received Bytes are: %lu\n My Received Packets are: %lu \n My received Errors: %lu \n Received Drops: %lu \n Received FIFO: %lu \n Received frame : %lu \n Received Compressed: %lu \n Received multicast: %lu \n", received_bytes, received_packets, received_errors, received_drops, received_fifo, received_frame, received_compressed, received_multicast);
-    printf("My Transmitted Bytes are: %lu\n My Transmitted Packets are: %lu \n My Transmitted Errors: %lu \n Transmitted Drops: %lu \n Transmitted FIFO: %lu \n Transmitted colls : %lu \n Transmitted carrier: %lu \n Transmitted compressed: %lu \n", transmitted_bytes, transmitted_packets, transmitted_errors, transmitted_drops, transmitted_fifo, transmitted_colls, transmitted_carrier, transmitted_compressed);
+    printf("====== Interface Name: %s ======\n", interface_name);
+    printf("Received Bytes: %lu\n Received Packets: %lu \n Received Errors: %lu \n Received Drops: %lu \n Received FIFO: %lu \n Received frame : %lu \n Received Compressed: %lu \n Received multicast: %lu \n", received_bytes, received_packets, received_errors, received_drops, received_fifo, received_frame, received_compressed, received_multicast);
+    printf("Transmitted Bytes: %lu\n Transmitted Packets: %lu \n Transmitted Errors: %lu \n Transmitted Drops: %lu \n Transmitted FIFO: %lu \n Transmitted colls : %lu \n Transmitted carrier: %lu \n Transmitted compressed: %lu \n", transmitted_bytes, transmitted_packets, transmitted_errors, transmitted_drops, transmitted_fifo, transmitted_colls, transmitted_carrier, transmitted_compressed);
   }
 
   fclose(fptr);
-}
-
-struct Interface
-{
-  char interface_name[64];
-  unsigned long received_bytes, received_packets, received_errors, received_drops, received_fifo, received_frame, received_compressed, received_multicast;
-  unsigned long transmitted_bytes, transmitted_packets, transmitted_errors, transmitted_drops, transmitted_fifo, transmitted_colls, transmitted_carrier, transmitted_compressed;
-};
-
-struct Interface create_interface(char interface_name[64], unsigned long received_bytes, unsigned long received_packets, unsigned long received_errors, unsigned long received_drops, unsigned long received_fifo, unsigned long received_frame, unsigned long received_compressed, unsigned long received_multicast, unsigned long transmitted_bytes, unsigned long transmitted_packets, unsigned long transmitted_errors, unsigned long transmitted_drops, unsigned long transmitted_fifo, unsigned long transmitted_colls, unsigned long transmitted_carrier, unsigned long transmitted_compressed)
-{
-  struct Interface inter;
-  strcpy(inter.interface_name, interface_name);
-  inter.received_bytes = received_bytes;
-  inter.received_packets = received_packets;
-  inter.received_errors = received_errors;
-  inter.received_drops = received_drops;
-  inter.received_fifo = received_fifo;
-  inter.received_frame = received_frame;
-  inter.received_compressed = received_compressed;
-  inter.received_multicast = received_multicast;
-
-  inter.transmitted_bytes = transmitted_bytes;
-  inter.transmitted_packets = transmitted_packets;
-  inter.transmitted_errors = transmitted_errors;
-  inter.transmitted_drops = transmitted_drops;
-  inter.transmitted_fifo = transmitted_fifo;
-  inter.transmitted_colls = transmitted_colls;
-  inter.transmitted_carrier = transmitted_carrier;
-  inter.transmitted_compressed = transmitted_compressed;
-  return inter;
 }
