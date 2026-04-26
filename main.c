@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>  // Allowsus to get input/output, like printf, scanf, fopen
 #include <stdlib.h> // Allows us to use malloc, atoi, strtol, exit (For dynamic memory)
 #include <string.h> // strlen, strcmp, strcpy
@@ -5,6 +6,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
 #define PORT 8080
 
 #define BUFFER_SIZE 1024
@@ -130,16 +132,57 @@ int main()
     fprintf(stderr, "Error Opening File /proc/net/dev");
     program_errors++;
   }
+
+  int port = 8080;
+  int backlog = 200;
+  int opt = 1;
+  struct sockaddr_in serv_addr;
+  socklen_t addrlen = sizeof(serv_addr);
+  serv_addr.sin_family = AF_INET;
+  serv_addr.sin_port = htons(port);
+  serv_addr.sin_addr.s_addr = INADDR_ANY; // or we doINADDR_ANY
+  char read_buffer[1024];
+  char *respose = "HTTP/1.1 200 OK\r\n"
+                  "Content-Type: text/plain\r\n"
+                  "\r\n"
+                  "hello from sysmon";
+
+  // socket takes three parameters,domain,type,protocol. AF_LOCAL =communication on the same host, to communicate with others we use IPv4(AF_INET) or IPv6 (AF_INET6)
+  // for type We have 2 commuincation types SOCK_STREAM(TCP) and SOCK_DGRAM (UDP)
+  // Protocol  is for protocol value not sure what it is but default is 0 Internet Protocol?
+  int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (server_fd < 0)
+  {
+    printf("\nSocket Creation ERROR \n");
+  }
+
+  // Forcefully attaching socket to the port 8080
+  if (setsockopt(server_fd, SOL_SOCKET,
+                 SO_REUSEADDR | SO_REUSEPORT, &opt,
+                 sizeof(opt)))
+  {
+    perror("setsockopt");
+    exit(EXIT_FAILURE);
+  }
+
+  // bind() takes on three parameters sockfd: socket file descriptor created using the socket() function.
+  //  addr: pointer to a struct sockaddr that contains the IP address and port number to bind the socket. this is a custom data struct that you have to use Do we have to use this data struct?
+  // addrlen: length of the addr structure. just do sizeof()??
+  bind(server_fd, (struct sockaddr *)&serv_addr, addrlen);
+  listen(server_fd, backlog);
+  struct sockaddr_in client_addr;
+  while (1)
+  {
+    int new_socket = accept(server_fd, (struct sockaddr *)&client_addr, &addrlen);
+
+    ssize_t valread = read(new_socket, read_buffer, 1024);
+    printf("\nMessage Received from Client %s\n", read_buffer);
+    write(new_socket, respose, strlen(respose));
+    printf("%s", respose);
+    close(new_socket);
+  }
+  close(server_fd);
   return program_errors;
-
-  int socket_file_descriptor = socket(AF_INET, SOCK_STREAM, 0);
-
-  struct sockaddr_in address;
-  address.sin_family = AF_INET;
-  address.sin_addr.s_addr = INADDR_ANY;
-  address.sin_port = htons(8080);
-
-  bind(server_fd, (struct sockaddr *)&address, sizeof(address));
 }
 
 int read_memory_info(unsigned long *total_memory, unsigned long *free_memory, unsigned long *available_memory)
